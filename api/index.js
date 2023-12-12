@@ -25,3 +25,13 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 
 app.listen(3000, () => console.log('Server started'))
+
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Enternal server error';
+    return res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message
+    });
+})
