@@ -20,16 +20,31 @@ export const updateUser = async (req, res, next) => {
             req.params.id,
             {
                 $set: {
-                    username: req.params.username,
-                    email: req.params.email,
-                    password: req.params.password,
-                    profilePicture: req.params.profilePicture,
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: req.body.password,
+                    profilePicture: req.body.profilePicture,
                 }
             }, {new: true} // to update the user database;
         );
-        const { password, ...rest } = updateUser._doc; // to separate the password
-        res.status(200).json(rest);
+        const updatedUserWithoutPassword = { ...updatedUser._doc, password: undefined }; // to separate the password
+        // console.log(updatedUserWithoutPassword)
+        res.status(200).json(updatedUserWithoutPassword);
     } catch(error) {
         next(error);
     }
+};
+
+export const deleteUser = async (req, res, next) => {
+    try {
+        if(req.user.id !== req.params.id) {
+            return next(errorHandlers(401, "You can only Delete your account!"));
+        }
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).json('User has been deleted!');
+    } catch (err) {
+        next(errorHandlers(401, "Encountered some error."))
+    }
+
 }
+
