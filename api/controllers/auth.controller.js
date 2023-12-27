@@ -26,22 +26,26 @@ export const signup = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
     const email = req.body.email;
-    const password = req.body.password
+    const password = req.body.password;
     try {
         const validUser = await User.findOne({ email });
-        if(!validUser) return errorHandlers(401, 'Invalid Credentials')
+        // console.log(validUser);
+        if(!validUser) return 'Invalid Credentials'
         const validPassword = bcryptjs.compareSync(password, validUser.password)
-        if(!validPassword) return errorHandlers(401, 'Invalid Credentials');
+        // console.log(validPassword);
+        if(validPassword === false) return errorHandlers(401, 'Invalid Credentials');
         const token = jwt.sign({id: validUser._id}, process.env.JWT_SECRET);
-        const { password: hashedPassword, ...rest } = validUser._doc; // removing password from 
+        const validUserWithoutPass = {...validUser,  password: undefined}; // removing password from valid user
+        // console.log(validUserWithoutPass);
+
         const expireDate = new Date(Date.now() + 3600000) // 1 hour
         res
             .cookie('access_token', token, { httpOnly: true, expires: expireDate } )
             .status(200)
-            .json(rest)
+            .json(validUserWithoutPass)
     } catch(error) {
         // res.json(error)
-        next(error)
+        next(errorHandlers(401, error))
     }
 }
 
