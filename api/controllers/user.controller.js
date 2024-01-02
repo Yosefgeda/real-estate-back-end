@@ -1,4 +1,5 @@
 import User from "../models/users.model.js";
+import Listing from "../models/listing.model.js";
 import { errorHandlers } from "../utils/error.js";
 import bcryptjs from 'bcryptjs';
 
@@ -47,4 +48,13 @@ export const deleteUser = async (req, res, next) => {
     }
 
 }
+
+export const getUserListings = async (req, res, next) => {
+    try {
+        const listings = await Listing.find({ userRef: req.params.id });
+        res.status(200).json(listings);
+    } catch (err) {
+        next(errorHandlers(401, "Encountered some error."))
+    }
+};
 
