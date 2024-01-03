@@ -19,3 +19,20 @@ export const deleteUserListing = async (req, res, next) => {
         next(errorHandlers(401, "Encountered some error."))
     }
 }
+
+export const updateListing = async (req, res, next) => {
+    const listing  = await Listing.findById(req.params.id);
+    if(!listing) return next(errorHandlers(401, "No listing found with this id"));
+    if(req.user.id !== listing.userRef) {
+        return next(errorHandlers(401, "You can only edit your listing!"));
+    }
+    try {
+      const updatedListing = await Listing.findByIdAndUpdate(req.params.id, 
+            req.body
+        , {new: true} // to update the user database;
+        );
+        res.status(200).json(updatedListing);
+    } catch(err) {
+
+    }
+}
